@@ -1,0 +1,669 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wizikey - AI-Powered Query Automation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["Inter", "sans-serif"],
+              display: ["Space Grotesk", "sans-serif"],
+            },
+            colors: {
+              brand: {
+                50: "#f0f9ff",
+                100: "#e0f2fe",
+                400: "#38bdf8",
+                500: "#0ea5e9",
+                600: "#0284c7",
+                900: "#0c4a6e",
+              },
+              accent: { purple: "#8b5cf6", pink: "#ec4899", cyan: "#06b6d4" },
+            },
+            animation: {
+              "pulse-slow": "pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+              float: "float 6s ease-in-out infinite",
+              "slide-up": "slideUp 0.5s ease-out",
+              glow: "glow 2s ease-in-out infinite alternate",
+            },
+            keyframes: {
+              float: {
+                "0%, 100%": { transform: "translateY(0)" },
+                "50%": { transform: "translateY(-20px)" },
+              },
+              slideUp: {
+                "0%": { transform: "translateY(20px)", opacity: "0" },
+                "100%": { transform: "translateY(0)", opacity: "1" },
+              },
+              glow: {
+                "0%": { boxShadow: "0 0 5px #0ea5e9, 0 0 10px #0ea5e9" },
+                "100%": { boxShadow: "0 0 20px #0ea5e9, 0 0 30px #0ea5e9" },
+              },
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      body {
+        background: #0a0a0f;
+        overflow-x: hidden;
+      }
+      .glass-panel {
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .glass-card {
+        background: linear-gradient(
+          135deg,
+          rgba(255, 255, 255, 0.05) 0%,
+          rgba(255, 255, 255, 0.01) 100%
+        );
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+      }
+      .gradient-text {
+        background: linear-gradient(
+          135deg,
+          #0ea5e9 0%,
+          #8b5cf6 50%,
+          #ec4899 100%
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .mesh-gradient {
+        background:
+          radial-gradient(
+            at 0% 0%,
+            rgba(14, 165, 233, 0.15) 0px,
+            transparent 50%
+          ),
+          radial-gradient(
+            at 100% 0%,
+            rgba(139, 92, 246, 0.15) 0px,
+            transparent 50%
+          ),
+          radial-gradient(
+            at 100% 100%,
+            rgba(236, 72, 153, 0.15) 0px,
+            transparent 50%
+          ),
+          radial-gradient(
+            at 0% 100%,
+            rgba(6, 182, 212, 0.15) 0px,
+            transparent 50%
+          );
+      }
+      .query-card {
+        transition: all 0.3s ease;
+      }
+      .query-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(14, 165, 233, 0.2);
+      }
+      .status-dot {
+        animation: pulse 2s infinite;
+      }
+      .typing-cursor::after {
+        content: "|";
+        animation: blink 1s infinite;
+      }
+      @keyframes blink {
+        0%,
+        50% {
+          opacity: 1;
+        }
+        51%,
+        100% {
+          opacity: 0;
+        }
+      }
+      .grid-pattern {
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        background-size: 50px 50px;
+      }
+      .orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(80px);
+        opacity: 0.4;
+        animation: float 10s ease-in-out infinite;
+      }
+      .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+      }
+      .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+    </style>
+  </head>
+  <body class="text-white font-sans antialiased">
+    <!-- Background Effects -->
+    <div class="fixed inset-0 mesh-gradient pointer-events-none"></div>
+    <div class="fixed inset-0 grid-pattern pointer-events-none"></div>
+    <!-- Floating Orbs -->
+    <div class="orb w-96 h-96 bg-brand-500 top-0 left-0 animate-float"></div>
+    <div
+      class="orb w-80 h-80 bg-accent-purple top-1/3 right-0 animate-float"
+      style="animation-delay: -2s"
+    ></div>
+    <div
+      class="orb w-72 h-72 bg-accent-pink bottom-0 left-1/3 animate-float"
+      style="animation-delay: -4s"
+    ></div>
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 glass-panel border-b border-white/10">
+      <div
+        class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center"
+      >
+        <div class="flex items-center gap-3">
+          <div
+            class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-400 to-accent-purple flex items-center justify-center font-bold text-xl font-display"
+          >
+            W
+          </div>
+          <span class="text-2xl font-display font-bold tracking-tight"
+            >Wizikey</span
+          >
+        </div>
+        <div
+          class="hidden md:flex items-center gap-8 text-sm font-medium text-gray-300"
+        >
+          <a href="#" class="hover:text-white transition-colors">Dashboard</a>
+          <a href="#" class="hover:text-white transition-colors">Queries</a>
+          <a href="#" class="hover:text-white transition-colors">Analytics</a>
+          <a href="#" class="hover:text-white transition-colors">Settings</a>
+        </div>
+        <div class="flex items-center gap-4">
+          <button
+            class="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white transition-colors"
+          >
+            Sign In
+          </button>
+          <button
+            class="px-6 py-2.5 bg-gradient-to-r from-brand-500 to-accent-purple rounded-full text-sm font-semibold hover:shadow-lg hover:shadow-brand-500/25 transition-all transform hover:scale-105"
+          >
+            Get Started
+          </button>
+        </div>
+      </div>
+    </nav>
+    <!-- Main Content -->
+    <main class="relative pt-24 pb-12 px-6 max-w-7xl mx-auto">
+      <!-- Hero Section -->
+      <div class="text-center mb-16 relative">
+        <div
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card mb-6 animate-slide-up"
+        >
+          <span class="w-2 h-2 rounded-full bg-green-400 status-dot"></span>
+          <span class="text-sm text-gray-300">AI Query Automation Active</span>
+        </div>
+        <h1
+          class="text-5xl md:text-7xl font-display font-bold mb-6 leading-tight animate-slide-up"
+          style="animation-delay: 0.1s"
+        >
+          Automate Your <br />
+          <span class="gradient-text">Media Intelligence</span>
+        </h1>
+        <p
+          class="text-xl text-gray-400 max-w-2xl mx-auto mb-10 animate-slide-up"
+          style="animation-delay: 0.2s"
+        >
+          Transform scattered data into strategic insights. Wizikey's AI-powered
+          query automation tracks, analyzes, and reports across all media
+          channels in real-time.
+        </p>
+        <!-- Query Input Interface -->
+        <div
+          class="max-w-3xl mx-auto relative animate-slide-up"
+          style="animation-delay: 0.3s"
+        >
+          <div class="glass-card rounded-2xl p-2 flex items-center gap-3">
+            <div class="pl-4 text-gray-400">
+              <i class="fas fa-search text-lg"></i>
+            </div>
+            <input
+              type="text"
+              id="queryInput"
+              placeholder="Enter your query: brand mentions, competitor analysis, sentiment tracking..."
+              class="flex-1 bg-transparent border-none outline-none text-white placeholder-gray-500 py-4 px-2 text-lg"
+            />
+            <button
+              onclick="executeQuery()"
+              class="px-8 py-3 bg-gradient-to-r from-brand-500 to-accent-purple rounded-xl font-semibold hover:shadow-lg hover:shadow-brand-500/25 transition-all transform hover:scale-105 flex items-center gap-2"
+            >
+              <span>Run Query</span> <i class="fas fa-bolt"></i>
+            </button>
+          </div>
+          <!-- Quick Tags -->
+          <div class="flex flex-wrap justify-center gap-2 mt-4">
+            <button
+              onclick="setQuery('Brand mentions last 24h')"
+              class="px-4 py-1.5 rounded-full glass-card text-sm text-gray-400 hover:text-white hover:border-brand-500/50 transition-all"
+            >
+              Brand mentions last 24h
+            </button>
+            <button
+              onclick="setQuery('Competitor analysis')"
+              class="px-4 py-1.5 rounded-full glass-card text-sm text-gray-400 hover:text-white hover:border-brand-500/50 transition-all"
+            >
+              Competitor analysis
+            </button>
+            <button
+              onclick="setQuery('Crisis monitoring')"
+              class="px-4 py-1.5 rounded-full glass-card text-sm text-gray-400 hover:text-white hover:border-brand-500/50 transition-all"
+            >
+              Crisis monitoring
+            </button>
+            <button
+              onclick="setQuery('Sentiment trends')"
+              class="px-4 py-1.5 rounded-full glass-card text-sm text-gray-400 hover:text-white hover:border-brand-500/50 transition-all"
+            >
+              Sentiment trends
+            </button>
+          </div>
+        </div>
+      </div>
+      <!-- Dashboard Preview -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
+        <!-- Active Queries Panel -->
+        <div class="lg:col-span-2 glass-card rounded-2xl p-6">
+          <div class="flex justify-between items-center mb-6">
+            <h3
+              class="text-xl font-display font-semibold flex items-center gap-2"
+            >
+              <i class="fas fa-robot text-brand-400"></i> Active Queries
+            </h3>
+            <div class="flex gap-2">
+              <button
+                class="p-2 rounded-lg hover:bg-white/5 transition-colors"
+                onclick="refreshQueries()"
+              >
+                <i class="fas fa-sync-alt text-gray-400 hover:text-white"></i>
+              </button>
+              <button
+                class="px-4 py-2 rounded-lg bg-brand-500/20 text-brand-400 text-sm font-medium hover:bg-brand-500/30 transition-colors"
+              >
+                + New Query
+              </button>
+            </div>
+          </div>
+          <div class="space-y-4" id="queriesList">
+            <!-- Query Item 1 -->
+            <div
+              class="query-card glass-panel rounded-xl p-4 border-l-4 border-brand-500"
+            >
+              <div class="flex justify-between items-start mb-3">
+                <div>
+                  <h4 class="font-semibold text-lg mb-1">
+                    Tech Industry Sentiment Analysis
+                  </h4>
+                  <p class="text-sm text-gray-400">
+                    Monitoring 1,240 sources • Updated 2m ago
+                  </p>
+                </div>
+                <span
+                  class="px-3 py-1 rounded-full bg-green-500/20 text-green-400 text-xs font-medium flex items-center gap-1"
+                >
+                  <span
+                    class="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"
+                  ></span>
+                  Live
+                </span>
+              </div>
+              <div class="flex items-center gap-6 text-sm">
+                <div class="flex items-center gap-2 text-gray-400">
+                  <i class="fas fa-database text-brand-400"></i>
+                  <span>45.2K mentions</span>
+                </div>
+                <div class="flex items-center gap-2 text-gray-400">
+                  <i class="fas fa-chart-line text-accent-purple"></i>
+                  <span>+12.5% growth</span>
+                </div>
+                <div
+                  class="flex-1 bg-gray-700/30 rounded-full h-2 overflow-hidden"
+                >
+                  <div
+                    class="bg-gradient-to-r from-brand-500 to-accent-purple h-full rounded-full"
+                    style="width: 75%"
+                  ></div>
+                </div>
+              </div>
+            </div>
+            <!-- Query Item 2 -->
+            <div
+              class="query-card glass-panel rounded-xl p-4 border-l-4 border-accent-purple"
+            >
+              <div class="flex justify-between items-start mb-3">
+                <div>
+                  <h4 class="font-semibold text-lg mb-1">
+                    Competitor Benchmark: Q1 2026
+                  </h4>
+                  <p class="text-sm text-gray-400">
+                    Monitoring 5 competitors • Updated 15m ago
+                  </p>
+                </div>
+                <span
+                  class="px-3 py-1 rounded-full bg-blue-500/20 text-blue-400 text-xs font-medium flex items-center gap-1"
+                >
+                  <i class="fas fa-check-circle"></i> Completed
+                </span>
+              </div>
+              <div class="flex items-center gap-6 text-sm">
+                <div class="flex items-center gap-2 text-gray-400">
+                  <i class="fas fa-file-alt text-accent-purple"></i>
+                  <span>Report ready</span>
+                </div>
+                <div class="flex items-center gap-2 text-gray-400">
+                  <i class="fas fa-download text-gray-400"></i>
+                  <span class="hover:text-white cursor-pointer"
+                    >Download PDF</span
+                  >
+                </div>
+              </div>
+            </div>
+            <!-- Query Item 3 -->
+            <div
+              class="query-card glass-panel rounded-xl p-4 border-l-4 border-accent-pink"
+            >
+              <div class="flex justify-between items-start mb-3">
+                <div>
+                  <h4 class="font-semibold text-lg mb-1">
+                    Crisis Alert: Product Launch
+                  </h4>
+                  <p class="text-sm text-gray-400">
+                    Real-time monitoring • High priority
+                  </p>
+                </div>
+                <span
+                  class="px-3 py-1 rounded-full bg-yellow-500/20 text-yellow-400 text-xs font-medium flex items-center gap-1"
+                >
+                  <i class="fas fa-exclamation-triangle"></i> Alert
+                </span>
+              </div>
+              <div class="flex items-center gap-4">
+                <div class="flex -space-x-2">
+                  <div
+                    class="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center text-xs font-bold border-2 border-gray-900"
+                  >
+                    3
+                  </div>
+                  <div
+                    class="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center text-xs font-bold border-2 border-gray-900"
+                  >
+                    2
+                  </div>
+                </div>
+                <span class="text-sm text-gray-400"
+                  >5 alerts require attention</span
+                >
+                <button
+                  class="ml-auto text-sm text-accent-pink hover:text-accent-purple transition-colors"
+                >
+                  Review →
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Stats Panel -->
+        <div class="space-y-6">
+          <!-- Metric Card 1 -->
+          <div
+            class="glass-card rounded-2xl p-6 relative overflow-hidden group"
+          >
+            <div
+              class="absolute top-0 right-0 w-32 h-32 bg-brand-500/10 rounded-full blur-3xl group-hover:bg-brand-500/20 transition-all"
+            ></div>
+            <div class="relative">
+              <div class="flex justify-between items-start mb-4">
+                <div class="p-3 rounded-xl bg-brand-500/20 text-brand-400">
+                  <i class="fas fa-bolt text-xl"></i>
+                </div>
+                <span
+                  class="text-green-400 text-sm font-medium flex items-center gap-1"
+                >
+                  <i class="fas fa-arrow-up"></i> 24%
+                </span>
+              </div>
+              <h3 class="text-3xl font-display font-bold mb-1">2.4M</h3>
+              <p class="text-gray-400 text-sm">Queries Processed</p>
+            </div>
+          </div>
+          <!-- Metric Card 2 -->
+          <div
+            class="glass-card rounded-2xl p-6 relative overflow-hidden group"
+          >
+            <div
+              class="absolute top-0 right-0 w-32 h-32 bg-accent-purple/10 rounded-full blur-3xl group-hover:bg-accent-purple/20 transition-all"
+            ></div>
+            <div class="relative">
+              <div class="flex justify-between items-start mb-4">
+                <div
+                  class="p-3 rounded-xl bg-accent-purple/20 text-accent-purple"
+                >
+                  <i class="fas fa-clock text-xl"></i>
+                </div>
+                <span
+                  class="text-green-400 text-sm font-medium flex items-center gap-1"
+                >
+                  <i class="fas fa-arrow-down"></i> 12%
+                </span>
+              </div>
+              <h3 class="text-3xl font-display font-bold mb-1">0.3s</h3>
+              <p class="text-gray-400 text-sm">Avg Response Time</p>
+            </div>
+          </div>
+          <!-- Metric Card 3 -->
+          <div
+            class="glass-card rounded-2xl p-6 relative overflow-hidden group"
+          >
+            <div
+              class="absolute top-0 right-0 w-32 h-32 bg-accent-pink/10 rounded-full blur-3xl group-hover:bg-accent-pink/20 transition-all"
+            ></div>
+            <div class="relative">
+              <div class="flex justify-between items-start mb-4">
+                <div class="p-3 rounded-xl bg-accent-pink/20 text-accent-pink">
+                  <i class="fas fa-bullseye text-xl"></i>
+                </div>
+                <span
+                  class="text-green-400 text-sm font-medium flex items-center gap-1"
+                >
+                  <i class="fas fa-arrow-up"></i> 8%
+                </span>
+              </div>
+              <h3 class="text-3xl font-display font-bold mb-1">98.5%</h3>
+              <p class="text-gray-400 text-sm">Accuracy Rate</p>
+            </div>
+          </div>
+          <!-- AI Status -->
+          <div class="glass-card rounded-2xl p-6 border border-brand-500/30">
+            <div class="flex items-center gap-3 mb-3">
+              <div
+                class="w-2 h-2 rounded-full bg-green-400 animate-pulse"
+              ></div>
+              <span class="text-sm font-medium text-brand-400"
+                >AI Engine Active</span
+              >
+            </div>
+            <p class="text-xs text-gray-400 mb-3">
+              Processing natural language queries with GPT-4 integration
+            </p>
+            <div class="flex gap-2">
+              <span class="px-2 py-1 rounded bg-white/5 text-xs text-gray-400"
+                >NLP</span
+              >
+              <span class="px-2 py-1 rounded bg-white/5 text-xs text-gray-400"
+                >ML</span
+              >
+              <span class="px-2 py-1 rounded bg-white/5 text-xs text-gray-400"
+                >Real-time</span
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Recent Activity & Insights -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Activity Feed -->
+        <div class="glass-card rounded-2xl p-6">
+          <h3
+            class="text-lg font-display font-semibold mb-4 flex items-center gap-2"
+          >
+            <i class="fas fa-stream text-accent-purple"></i> Recent Activity
+          </h3>
+          <div class="space-y-4 max-h-64 overflow-y-auto scrollbar-hide">
+            <div class="flex gap-3 items-start pb-3 border-b border-white/5">
+              <div
+                class="w-8 h-8 rounded-full bg-brand-500/20 flex items-center justify-center flex-shrink-0 mt-1"
+              >
+                <i class="fas fa-robot text-brand-400 text-xs"></i>
+              </div>
+              <div>
+                <p class="text-sm text-gray-300">
+                  Automated query executed:
+                  <span class="text-white font-medium"
+                    >"Brand sentiment analysis"</span
+                  >
+                </p>
+                <p class="text-xs text-gray-500 mt-1">2 minutes ago</p>
+              </div>
+            </div>
+            <div class="flex gap-3 items-start pb-3 border-b border-white/5">
+              <div
+                class="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0 mt-1"
+              >
+                <i class="fas fa-check text-green-400 text-xs"></i>
+              </div>
+              <div>
+                <p class="text-sm text-gray-300">
+                  Report generated:
+                  <span class="text-white font-medium">Q1 Media Coverage</span>
+                </p>
+                <p class="text-xs text-gray-500 mt-1">15 minutes ago</p>
+              </div>
+            </div>
+            <div class="flex gap-3 items-start pb-3 border-b border-white/5">
+              <div
+                class="w-8 h-8 rounded-full bg-yellow-500/20 flex items-center justify-center flex-shrink-0 mt-1"
+              >
+                <i class="fas fa-exclamation text-yellow-400 text-xs"></i>
+              </div>
+              <div>
+                <p class="text-sm text-gray-300">
+                  Alert triggered:
+                  <span class="text-white font-medium"
+                    >Negative sentiment spike</span
+                  >
+                </p>
+                <p class="text-xs text-gray-500 mt-1">1 hour ago</p>
+              </div>
+            </div>
+            <div class="flex gap-3 items-start">
+              <div
+                class="w-8 h-8 rounded-full bg-accent-purple/20 flex items-center justify-center flex-shrink-0 mt-1"
+              >
+                <i class="fas fa-user text-accent-purple text-xs"></i>
+              </div>
+              <div>
+                <p class="text-sm text-gray-300">
+                  Manual query by
+                  <span class="text-white font-medium">Sarah M.</span>
+                </p>
+                <p class="text-xs text-gray-500 mt-1">3 hours ago</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Quick Insights -->
+        <div class="glass-card rounded-2xl p-6">
+          <h3
+            class="text-lg font-display font-semibold mb-4 flex items-center gap-2"
+          >
+            <i class="fas fa-lightbulb text-accent-pink"></i> AI Insights
+          </h3>
+          <div class="space-y-4">
+            <div
+              class="p-4 rounded-xl bg-gradient-to-r from-brand-500/10 to-transparent border-l-2 border-brand-500"
+            >
+              <p class="text-sm text-gray-300 mb-2">Trending Topic Detected</p>
+              <p class="text-xs text-gray-400">
+                "Sustainability initiatives" mentions increased by 340% in your
+                industry this week.
+              </p>
+            </div>
+            <div
+              class="p-4 rounded-xl bg-gradient-to-r from-accent-purple/10 to-transparent border-l-2 border-accent-purple"
+            >
+              <p class="text-sm text-gray-300 mb-2">Competitor Movement</p>
+              <p class="text-xs text-gray-400">
+                Competitor X launched a new campaign. Sentiment analysis shows
+                mixed reactions (62% positive).
+              </p>
+            </div>
+            <div
+              class="p-4 rounded-xl bg-gradient-to-r from-accent-pink/10 to-transparent border-l-2 border-accent-pink"
+            >
+              <p class="text-sm text-gray-300 mb-2">Recommendation</p>
+              <p class="text-xs text-gray-400">
+                Consider increasing monitoring frequency for crisis keywords
+                based on current volatility.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <!-- Footer -->
+    <footer class="border-t border-white/10 mt-12 py-8 px-6">
+      <div
+        class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4"
+      >
+        <div class="flex items-center gap-2">
+          <div
+            class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-400 to-accent-purple flex items-center justify-center font-bold text-sm"
+          >
+            W
+          </div>
+          <span class="font-display font-semibold">Wizikey</span>
+        </div>
+        <p class="text-sm text-gray-500">
+          © 2026 Wizikey. AI-Powered Media Intelligence.
+        </p>
+        <div class="flex gap-4">
+          <a href="#" class="text-gray-400 hover:text-white transition-colors"
+            ><i class="fab fa-twitter"></i
+          ></a>
+          <a href="#" class="text-gray-400 hover:text-white transition-colors"
+            ><i class="fab fa-linkedin"></i
+          ></a>
+          <a href="#" class="text-gray-400 hover:text-white transition-colors"
+            ><i class="fab fa-github"></i
+          ></a>
+        </div>
+      </div>
+    </footer>
+    <script>
+      // Query Input Handler function setQuery(text) { document.getElementById('queryInput').value = text; document.getElementById('queryInput').focus(); } function executeQuery() { const input = document.getElementById('queryInput'); const value = input.value.trim(); if (!value) { input.classList.add('animate-pulse'); setTimeout(() => input.classList.remove('animate-pulse'), 500); return; } // Simulate query execution const btn = document.querySelector('button[onclick="executeQuery()"]'); const originalContent = btn.innerHTML; btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Processing...'; btn.disabled = true; setTimeout(() => { btn.innerHTML = originalContent; btn.disabled = false; input.value = ''; // Add new query to list addNewQuery(value); }, 1500); } function addNewQuery(queryText) { const list = document.getElementById('queriesList'); const newQuery = document.createElement('div'); newQuery.className = 'query-card glass-panel rounded-xl p-4 border-l-4 border-brand-500 animate-slide-up'; newQuery.innerHTML = <div class="flex justify-between items-start mb-3"> <div> <h4 class="font-semibold text-lg mb-1">${queryText}</h4> <p class="text-sm text-gray-400">Just now • Processing...</p> </div> <span class="px-3 py-1 rounded-full bg-brand-500/20 text-brand-400 text-xs font-medium flex items-center gap-1"> <i class="fas fa-circle-notch fa-spin"></i> Running </span> </div> <div class="flex items-center gap-6 text-sm"> <div class="flex items-center gap-2 text-gray-400"> <i class="fas fa-spinner fa-spin text-brand-400"></i> <span>Analyzing sources...</span> </div> <div class="flex-1 bg-gray-700/30 rounded-full h-2 overflow-hidden"> <div class="bg-gradient-to-r from-brand-500 to-accent-purple h-full rounded-full animate-pulse" style="width: 30%"></div> </div> </div> ; list.insertBefore(newQuery, list.firstChild); // Simulate completion setTimeout(() => { newQuery.querySelector('.fa-circle-notch').className = 'fas fa-check'; newQuery.querySelector('.bg-brand-500\\/20').className = 'px-3 py-1 rounded-full bg-green-500/20 text-green-400 text-xs font-medium flex items-center gap-1'; newQuery.querySelector('.text-brand-400').innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-green-400"></span> Live'; newQuery.querySelector('.text-gray-400').textContent = 'Monitoring 1,240 sources • Updated just now'; }, 3000); } function refreshQueries() { const icon = document.querySelector('.fa-sync-alt'); icon.classList.add('fa-spin'); setTimeout(() => icon.classList.remove('fa-spin'), 1000); } // Enter key handler document.getElementById('queryInput').addEventListener('keypress', function(e) { if (e.key === 'Enter') executeQuery(); }); // Simulate real-time updates setInterval(() => { const dots = document.querySelectorAll('.status-dot'); dots.forEach(dot => { dot.style.opacity = Math.random() > 0.5 ? '1' : '0.5'; }); }, 2000);
+    </script>
+  </body>
+</html>

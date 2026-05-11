@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wizikey Query Automator</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="background">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+      <div class="orb orb-3"></div>
+      <div class="grid-pattern"></div>
+    </div>
+
+    <div class="container">
+      <div class="card">
+        <!-- HEADER -->
+        <div class="header">
+          <div class="logo">
+            <img
+              src="{{ url_for('static', filename='wizikey-logo-1.png') }}"
+              alt="Wizikey"
+              class="logo-image"
+            />
+          </div>
+          <h1>AI Query Automator</h1>
+          <p class="subtitle">Generate multilingual search queries instantly</p>
+        </div>
+
+        <!-- KEYWORD -->
+        <div class="input-group">
+          <label class="input-label">
+            <i class="fas fa-search"></i> Enter Keyword
+          </label>
+          <input
+            type="text"
+            id="keyword"
+            placeholder="e.g Airtel, Samsung..."
+          />
+        </div>
+
+        <!-- OPERATOR -->
+        <div class="input-group">
+          <label class="input-label">
+            <i class="fas fa-code-branch"></i> Select Operator
+          </label>
+          <select id="operator" class="operator-select">
+            <option value="AND">AND</option>
+            <option value="OR">OR</option>
+          </select>
+        </div>
+
+        <!-- LANGUAGE PILLS -->
+        <div class="input-group">
+          <label class="input-label">
+            <i class="fas fa-globe"></i> Select Languages
+          </label>
+          <div class="lang-pills" id="langPills">
+            <button class="lang-pill" data-lang="Hindi">Hindi</button>
+            <button class="lang-pill" data-lang="English">English</button>
+            <button class="lang-pill" data-lang="Bengali">Bengali</button>
+            <button class="lang-pill" data-lang="Gujarati">Gujarati</button>
+            <button class="lang-pill" data-lang="Marathi">Marathi</button>
+            <button class="lang-pill" data-lang="Tamil">Tamil</button>
+            <button class="lang-pill" data-lang="Telugu">Telugu</button>
+            <button class="lang-pill" data-lang="Kannada">Kannada</button>
+            <button class="lang-pill" data-lang="Malayalam">Malayalam</button>
+            <button class="lang-pill" data-lang="Punjabi">Punjabi</button>
+            <button class="lang-pill" data-lang="Urdu">Urdu</button>
+          </div>
+        </div>
+
+        <!-- GENERATE BUTTON -->
+        <button class="generate-btn" onclick="generateQuery()" id="generateBtn">
+          <span class="btn-content">
+            <i class="fas fa-bolt"></i> Generate Query
+          </span>
+          <span class="btn-loading">
+            <i class="fas fa-circle-notch fa-spin"></i> Generating...
+          </span>
+          <div class="btn-glow"></div>
+        </button>
+
+        <!-- OUTPUT -->
+        <div class="output-container" id="outputContainer">
+          <div class="output-header">
+            <span class="output-label"
+              ><i class="fas fa-terminal"></i> Generated Query</span
+            >
+            <button class="copy-btn" onclick="copyQuery()" id="copyBtn">
+              <i class="fas fa-copy"></i> Copy
+            </button>
+          </div>
+          <div class="output-wrapper">
+            <textarea
+              id="output"
+              readonly
+              placeholder="Your generated query will appear here..."
+            ></textarea>
+            <div class="output-glow"></div>
+          </div>
+          <button class="redirect-btn" onclick="openOpoint()" id="redirectBtn">
+            <i class="fas fa-external-link-alt"></i> Open in Opoint Search
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOAST -->
+    <div class="toast" id="toast">
+      <i class="fas fa-check-circle"></i>
+      <span id="toastMsg">Copied to clipboard!</span>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+  </body>
+</html>

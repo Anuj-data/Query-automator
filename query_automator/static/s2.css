@@ -1,0 +1,10 @@
+.operator-select {
+  width: 100%;
+  padding: 16px;
+  border-radius: 12px;
+  background: rgba(30, 41, 59, 0.5);
+  border: 1px solid var(--border);
+  color: rgb(21, 20, 20);
+  font-size: 16px;
+  outline: none;
+}

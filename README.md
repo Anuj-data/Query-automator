@@ -1,3 +1,6 @@
+![Wizikey] https://github.com/Anuj-data/Query-automator/blob/main/query_automator/wizkey.png
+
+
 # AI Query Automator
 
 **Internal tool for Wizikey media intelligence teams** — generate multilingual Boolean search queries instantly, ready to deploy on Opoint.
